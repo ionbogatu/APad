@@ -1,22 +1,28 @@
 package com.example.apad;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.text.style.AbsoluteSizeSpan;
 import android.util.DisplayMetrics;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -26,6 +32,7 @@ import java.util.ArrayList;
 public class AddEditActivity extends AppCompatActivity {
     private MyEditText myEditText;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,9 +60,24 @@ public class AddEditActivity extends AppCompatActivity {
         FontSizeClick();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu, menu);
+
+        return true;
+    }
+
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivityForResult(mainActivityIntent, 0);
+        switch (item.getItemId()) {
+            case R.id.save:
+                SaveTextToFile();
+                break;
+            default:
+                Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivityForResult(mainActivityIntent, 0);
+        }
+
         return true;
     }
 
@@ -111,5 +133,15 @@ public class AddEditActivity extends AppCompatActivity {
 
     private int convertDpToPx(int dp) {
         return Math.round(dp * (getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    private void SaveTextToFile() {
+        SaveModal saveModal = new SaveModal();
+
+        Bundle args = new Bundle();
+        args.putString("data", Html.toHtml(myEditText.getText()));
+        saveModal.setArguments(args);
+
+        saveModal.show(getSupportFragmentManager(), "save modal");
     }
 }
