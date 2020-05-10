@@ -20,26 +20,30 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 
 public class SaveModal extends AppCompatDialogFragment {
+    private int id = 0;
     private String data = null;
 
     private String absolutePath = null;
     private String fileName = null;
+
     private EditText fileNameInput;
     private TextView fullPathLabel;
+    private DatabaseHelper databaseHelper;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        this.databaseHelper = new DatabaseHelper(getActivity());
+
         Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey("data")) {
-            data = arguments.getString("data");
-        }
+        data = arguments.getString("data");
+        id = arguments.getInt("id");
+        absolutePath = arguments.getString("absolutePath");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -67,9 +71,19 @@ public class SaveModal extends AppCompatDialogFragment {
             }
         });
 
+        Bundle arguments = getArguments();
+        fileName = arguments.getString("fileName");
+        if (fileName.endsWith(".note")) {
+            fileName = fileName.substring(0, fileName.length() - 5);
+        }
+
+        fileNameInput.setText(fileName);
+
         fullPathLabel = view.findViewById(R.id.absoluteDirectory);
 
-        absolutePath = getContext().getDataDir().getAbsolutePath() + "/";
+        if (fileName.length() > 0) {
+            fullPathLabel.setText("The file will be saved under " + Paths.get(absolutePath, fileName).toString() + ".note");
+        }
 
         Button selectFolderButton = view.findViewById(R.id.selectFolderButton);
         selectFolderButton.setOnClickListener(new View.OnClickListener() {
@@ -84,12 +98,20 @@ public class SaveModal extends AppCompatDialogFragment {
             @Override
             public void onClick(View v) {
                 try {
-                    if (data != null && SaveModal.this.fileNameInput.getError() != null) {
-                        FileOutputStream fos = new FileOutputStream(Paths.get(absolutePath, fileNameInput.getText().toString()).toString() + ".note");
+                    if (data != null && SaveModal.this.fileNameInput.getError() == null) {
+                        String fileName = fileNameInput.getText().toString() + ".note";
+                        String fullPath = Paths.get(absolutePath, fileName).toString();
+                        FileOutputStream fos = new FileOutputStream(fullPath);
                         PrintWriter printWriter = new PrintWriter(fos);
                         printWriter.write(data);
                         printWriter.close();
                         fos.close();
+
+                        id = SaveModal.this.databaseHelper.saveData(id, fileName, absolutePath);
+                        AddEditActivity addEditActivity = (AddEditActivity) getActivity();
+                        addEditActivity.setId(id);
+                        addEditActivity.setAbsolutePath(absolutePath);
+                        addEditActivity.setFilename(fileName);
                     }
 
                     SaveModal.this.dismiss();
@@ -124,5 +146,12 @@ public class SaveModal extends AppCompatDialogFragment {
         } catch (Exception e) {
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        this.databaseHelper = null;
     }
 }

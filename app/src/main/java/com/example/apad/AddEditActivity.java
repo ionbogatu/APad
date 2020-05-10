@@ -1,7 +1,6 @@
 package com.example.apad;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
@@ -11,7 +10,6 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.TextWatcher;
 import android.text.style.AbsoluteSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -19,7 +17,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ToggleButton;
 
 import androidx.annotation.RequiresApi;
@@ -30,6 +27,10 @@ import androidx.appcompat.widget.Toolbar;
 import java.util.ArrayList;
 
 public class AddEditActivity extends AppCompatActivity {
+    private int id = 0;
+    private String absolutePath = null;
+    private String fileName = "";
+
     private MyEditText myEditText;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -58,6 +59,9 @@ public class AddEditActivity extends AppCompatActivity {
         myEditText.setUnderlineToggleButton(underlinedToggle);
 
         FontSizeClick();
+
+        absolutePath = getApplicationContext().getDataDir().getAbsolutePath() + "/";
+        int a = 1;
     }
 
     @Override
@@ -79,6 +83,18 @@ public class AddEditActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setAbsolutePath(String absolutePath) {
+        this.absolutePath = absolutePath;
+    }
+
+    public void setFilename(String fileName) {
+        this.fileName = fileName;
     }
 
     private void FontSizeClick() {
@@ -140,6 +156,9 @@ public class AddEditActivity extends AppCompatActivity {
 
         Bundle args = new Bundle();
         args.putString("data", Html.toHtml(myEditText.getText()));
+        args.putInt("id", id);
+        args.putString("absolutePath", absolutePath);
+        args.putString("fileName", fileName);
         saveModal.setArguments(args);
 
         saveModal.show(getSupportFragmentManager(), "save modal");

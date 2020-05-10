@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/noteName"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:gravity="center|left"
+            android:paddingLeft="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:text="Description"
+            android:textSize="12sp"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/editAction"
+            android:layout_width="wrap_content"
+            android:layout_height="?android:attr/listPreferredItemHeight"
+            android:layout_weight="1"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            app:srcCompat="@drawable/ic_edit_blue_24dp"
+            tools:ignore="VectorDrawableCompat" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/deleteAction"
+            android:layout_width="wrap_content"
+            android:layout_height="?android:attr/listPreferredItemHeight"
+            android:layout_weight="1"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:layout_gravity="end"
+            app:srcCompat="@drawable/ic_delete_red_24dp"
+            tools:ignore="VectorDrawableCompat" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
