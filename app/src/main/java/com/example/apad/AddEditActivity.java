@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.RequiresApi;
@@ -24,6 +25,11 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class AddEditActivity extends AppCompatActivity {
@@ -33,7 +39,7 @@ public class AddEditActivity extends AppCompatActivity {
 
     private MyEditText myEditText;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,8 +66,40 @@ public class AddEditActivity extends AppCompatActivity {
 
         FontSizeClick();
 
-        absolutePath = getApplicationContext().getDataDir().getAbsolutePath() + "/";
-        int a = 1;
+        if (getIntent().getStringExtra("name") != null) {
+            fileName = getIntent().getStringExtra("name");
+        }
+
+        if (getIntent().getStringExtra("path") != null) {
+            absolutePath = getIntent().getStringExtra("path");
+        } else {
+            absolutePath = getApplicationContext().getDataDir().getAbsolutePath() + "/";
+        }
+
+        if (getIntent().getStringExtra("id") != null) {
+            id = Integer.parseInt(getIntent().getStringExtra("id"));
+            try {
+                String filePath = Paths.get(absolutePath, fileName).toString();
+                File editFile = new File(filePath);
+                if (editFile.exists()) {
+                    FileInputStream fis = new FileInputStream(editFile);
+
+                    StringBuilder stringBuilder = new StringBuilder();
+                    int content;
+                    while ((content = fis.read()) != -1) {
+                        stringBuilder.append((char) content);
+                    }
+
+                    fis.close();
+
+                    if (stringBuilder.length() > 0) {
+                        myEditText.setText(Html.fromHtml(stringBuilder.toString()));
+                    }
+                }
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

@@ -10,15 +10,19 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -80,14 +84,60 @@ public class MainActivity extends AppCompatActivity {
 
         @NonNull
         @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        public View getView(final int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            final HashMap<String, Object> note = MainActivity.this.notes.get(position);
+
             LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View row = layoutInflater.inflate(R.layout.note_list_view, parent, false);
             TextView title = row.findViewById(R.id.noteName);
+            AppCompatImageView editAction = row.findViewById(R.id.editAction);
+            editAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent addEditActivityIntent = new Intent(MainActivity.this, AddEditActivity.class);
+                    addEditActivityIntent.putExtra("id", note.get("id").toString());
+                    addEditActivityIntent.putExtra("path", note.get("path").toString());
+                    addEditActivityIntent.putExtra("name", note.get("name").toString());
+                    startActivity(addEditActivityIntent);
+                }
+            });
+
+            AppCompatImageView deleteAction = row.findViewById(R.id.deleteAction);
+            deleteAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DeleteNote(note, position);
+                }
+            });
 
             title.setText(this.notes.get(position).get("name").toString());
 
             return row;
+        }
+
+        private void DeleteNote(HashMap<String, Object> note, int position) {
+            try {
+                // delete local file
+                String fileName = Paths.get(note.get("path").toString(), note.get("name").toString()).toString();
+                File fileToDelete = new File(fileName);
+                if (fileToDelete.exists()) {
+                    if (!fileToDelete.delete()) {
+                        throw new Exception("Unable to delete the file at \"" + fileName + "\"");
+                    }
+                }
+
+                // delete database entry
+                boolean deleteResult = MainActivity.this.databaseHelper.deleteNote((int) note.get("id"));
+                if (!deleteResult) {
+                    throw new Exception("Unable to delete the note form database");
+                }
+
+                // delete notes from array
+                MainActivity.this.notes.remove(position);
+                notifyDataSetChanged();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

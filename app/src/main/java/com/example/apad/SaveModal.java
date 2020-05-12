@@ -97,27 +97,27 @@ public class SaveModal extends AppCompatDialogFragment {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    if (data != null && SaveModal.this.fileNameInput.getError() == null) {
-                        String fileName = fileNameInput.getText().toString() + ".note";
-                        String fullPath = Paths.get(absolutePath, fileName).toString();
-                        FileOutputStream fos = new FileOutputStream(fullPath);
-                        PrintWriter printWriter = new PrintWriter(fos);
-                        printWriter.write(data);
-                        printWriter.close();
-                        fos.close();
+            try {
+                if (data != null && SaveModal.this.fileNameInput.getError() == null) {
+                    String fileName = fileNameInput.getText().toString() + ".note";
+                    String fullPath = Paths.get(absolutePath, fileName).toString();
+                    FileOutputStream fos = new FileOutputStream(fullPath);
+                    PrintWriter printWriter = new PrintWriter(fos);
+                    printWriter.write(data);
+                    printWriter.close();
+                    fos.close();
 
-                        id = SaveModal.this.databaseHelper.saveData(id, fileName, absolutePath);
-                        AddEditActivity addEditActivity = (AddEditActivity) getActivity();
-                        addEditActivity.setId(id);
-                        addEditActivity.setAbsolutePath(absolutePath);
-                        addEditActivity.setFilename(fileName);
-                    }
-
-                    SaveModal.this.dismiss();
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    id = SaveModal.this.databaseHelper.saveData(id, fileName, absolutePath);
+                    AddEditActivity addEditActivity = (AddEditActivity) getActivity();
+                    addEditActivity.setId(id);
+                    addEditActivity.setAbsolutePath(absolutePath);
+                    addEditActivity.setFilename(fileName);
                 }
+
+                SaveModal.this.dismiss();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
             }
         });
 
